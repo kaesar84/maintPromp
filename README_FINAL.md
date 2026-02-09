@@ -173,9 +173,18 @@ Este proyecto ya incluye `render.yaml` para desplegar con SQLite persistente.
    - Servicio web Node.js
    - Disco persistente en `/var/data`
    - `DATABASE_URL=file:/var/data/dev.db`
-5. Al arrancar, el comando `npm run start:render` ejecuta:
+5. Al arrancar, el comando `npm start` ejecuta:
    - `npm run db:push` (sincroniza tablas)
    - `next start`
+
+### Si lo configuras manualmente (sin Blueprint)
+
+Usa exactamente:
+
+- Build Command: `npm ci --include=dev && npm run build`
+- Start Command: `npm start`
+- Environment Variable: `DATABASE_URL=file:/var/data/dev.db`
+- Disk: mount path `/var/data` (mínimo 1 GB)
 
 ### Cargar datos demo en producción (opcional)
 
