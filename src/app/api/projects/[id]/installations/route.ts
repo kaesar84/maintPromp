@@ -1,34 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { setProjectInstallations } from '@/lib/store';
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Sin verificación de auth - modo demo
     const body = await req.json();
-    const { installations } = body;
+    const installations = Array.isArray(body.installations) ? body.installations : [];
+    const updated = await setProjectInstallations(params.id, installations);
 
-    // Eliminar instalaciones existentes
-    await prisma.installation.deleteMany({
-      where: { projectId: params.id }
-    });
-
-    // Crear nuevas instalaciones
-    if (installations && installations.length > 0) {
-      await prisma.installation.createMany({
-        data: installations.map((type: string) => ({
-          projectId: params.id,
-          type,
-          enabled: true
-        }))
-      });
+    if (!updated) {
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
-
-    const updated = await prisma.installation.findMany({
-      where: { projectId: params.id }
-    });
 
     return NextResponse.json(updated);
   } catch (error) {

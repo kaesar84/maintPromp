@@ -49,28 +49,22 @@ else
 fi
 echo ""
 
-# Verificar base de datos
-echo "✓ Verificando base de datos..."
-if [ -f "prisma/dev.db" ]; then
-    echo "  ✓ Base de datos existe"
-    echo "  → Verificando tablas principales..."
-    sqlite3 prisma/dev.db "SELECT COUNT(*) FROM Project;" >/dev/null 2>&1 && echo "  ✓ Tabla Project OK" || echo "  ⚠ No se pudo validar tabla Project (SQLite3 no instalado o esquema incompleto)"
+# Verificar store
+echo "✓ Verificando store local..."
+if [ -f "data/store.json" ]; then
+    echo "  ✓ Store existe: data/store.json"
 else
-    echo "  ✗ Base de datos NO EXISTE - ejecuta: npm run db:push && npm run db:seed"
+    echo "  ℹ Store todavía no existe (se crea automáticamente al usar la app)"
 fi
 echo ""
 
-# Verificar templates
-echo "✓ Verificando templates de prompts..."
-if [ -f "prisma/dev.db" ]; then
-    COUNT=$(sqlite3 prisma/dev.db "SELECT COUNT(*) FROM PromptTemplate;" 2>/dev/null || echo "?")
-    if [ "$COUNT" = "7" ]; then
-        echo "  ✓ 7 templates encontrados"
-    else
-        echo "  ⚠ Templates: $COUNT (deberían ser 7)"
-    fi
+# Verificar proyectos en store (opcional)
+echo "✓ Verificando proyectos en store..."
+if [ -f "data/store.json" ]; then
+    COUNT=$(node -e 'const fs=require("fs");const p="data/store.json";const d=JSON.parse(fs.readFileSync(p,"utf8"));console.log(Array.isArray(d.projects)?d.projects.length:0);' 2>/dev/null || echo "?")
+    echo "  ✓ Proyectos en store: $COUNT"
 else
-    echo "  ⚠ No se puede verificar (DB no existe)"
+    echo "  ℹ No hay proyectos todavía"
 fi
 echo ""
 
@@ -78,7 +72,7 @@ echo "=============================="
 echo "RESULTADO:"
 echo "=============================="
 
-if [ -d "node_modules" ] && [ -f "prisma/dev.db" ]; then
+if [ -d "node_modules" ]; then
     echo "✅ INSTALACIÓN COMPLETA"
     echo ""
     echo "Puedes ejecutar:"
@@ -92,9 +86,6 @@ else
     if [ ! -d "node_modules" ]; then
         echo "  1. npm install"
     fi
-    echo "  2. npx prisma generate"
-    echo "  3. npm run db:push"
-    echo "  4. npm run db:seed"
-    echo "  5. npm run dev"
+    echo "  2. npm run dev"
 fi
 echo ""

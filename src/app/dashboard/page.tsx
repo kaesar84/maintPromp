@@ -1,52 +1,10 @@
 import Link from 'next/link';
 import { Button, Card } from '@/components/ui';
-import { prisma } from '@/lib/db';
 import DeleteProjectButton from '@/components/dashboard/DeleteProjectButton';
+import { listProjects } from '@/lib/store';
 
 export default async function DashboardPage() {
-  let projects: any[] = [];
-  let dbReady = true;
-
-  try {
-    // Obtener todos los proyectos (sin filtro de usuario)
-    projects = await prisma.project.findMany({
-      where: {
-        archived: false
-      },
-      include: {
-        installations: true,
-        _count: {
-          select: {
-            versions: true
-          }
-        }
-      },
-      orderBy: { updatedAt: 'desc' }
-    });
-  } catch (error) {
-    dbReady = false;
-    console.error('Dashboard DB error:', error);
-  }
-
-  if (!dbReady) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <main className="max-w-3xl mx-auto px-4 py-16">
-          <Card className="p-8">
-            <h1 className="text-2xl font-bold mb-3">Base de datos no inicializada</h1>
-            <p className="text-gray-600 mb-6">
-              El dashboard no puede cargar proyectos porque faltan tablas en SQLite.
-            </p>
-            <pre className="bg-gray-900 text-gray-100 p-4 rounded-md text-sm overflow-x-auto">
-{`npm run db:push
-npm run db:seed
-npm run dev`}
-            </pre>
-          </Card>
-        </main>
-      </div>
-    );
-  }
+  const projects = await listProjects();
 
   const stats = {
     totalProjects: projects.length,

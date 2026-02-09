@@ -1,38 +1,39 @@
 #!/usr/bin/env node
 
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
+const fs = require('fs');
+const path = require('path');
 
 async function checkCredentials() {
-  console.log('🔍 VERIFICANDO BASE DE DATOS');
+  console.log('🔍 VERIFICANDO STORE LOCAL');
   console.log('============================\n');
 
   try {
-    const templates = await prisma.promptTemplate.count();
-    const projects = await prisma.project.count();
+    const storePath = path.join(process.cwd(), 'data', 'store.json');
+    const exists = fs.existsSync(storePath);
 
-    if (templates === 0) {
-      console.log('❌ ERROR: No hay templates cargados');
-      console.log('\nSolución:');
-      console.log('  npm run db:seed');
-      process.exit(1);
+    if (!exists) {
+      console.log('ℹ️  Store no creado todavía (se genera automáticamente en el primer uso)');
+      console.log(`   Ruta esperada: ${storePath}`);
+      console.log('\nDashboard listo en: http://localhost:3000/dashboard');
+      return;
     }
 
-    console.log('✅ Base de datos operativa');
-    console.log(`   Templates: ${templates}`);
-    console.log(`   Proyectos: ${projects}\n`);
+    const raw = fs.readFileSync(storePath, 'utf-8');
+    const parsed = JSON.parse(raw);
+    const projects = Array.isArray(parsed.projects) ? parsed.projects.length : 0;
+
+    console.log('✅ Store operativo');
+    console.log(`   Proyectos: ${projects}`);
+    console.log(`   Archivo: ${storePath}\n`);
 
     console.log('Dashboard listo en: http://localhost:3000/dashboard');
 
   } catch (error) {
     console.error('❌ Error:', error.message);
     console.log('\nPosibles soluciones:');
-    console.log('  npm run db:push');
-    console.log('  npm run db:seed');
+    console.log('  1) Ejecuta una vez la app y vuelve a comprobar');
+    console.log('  2) Borra data/store.json si está corrupto');
     process.exit(1);
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

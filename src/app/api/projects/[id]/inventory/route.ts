@@ -1,40 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { upsertProjectInventory } from '@/lib/store';
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Sin auth - modo demo
     const body = await req.json();
-    const { items } = body;
+    const items = Array.isArray(body.items) ? body.items : [];
+    const updated = await upsertProjectInventory(params.id, items);
 
-    // Actualizar usando upsert para cada item
-    for (const item of items) {
-      await prisma.inventoryItem.upsert({
-        where: {
-          projectId_installationType_fieldKey: {
-            projectId: params.id,
-            installationType: item.installationType,
-            fieldKey: item.fieldKey
-          }
-        },
-        update: {
-          fieldValue: item.fieldValue
-        },
-        create: {
-          projectId: params.id,
-          installationType: item.installationType,
-          fieldKey: item.fieldKey,
-          fieldValue: item.fieldValue
-        }
-      });
+    if (!updated) {
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
-
-    const updated = await prisma.inventoryItem.findMany({
-      where: { projectId: params.id }
-    });
 
     return NextResponse.json(updated);
   } catch (error) {

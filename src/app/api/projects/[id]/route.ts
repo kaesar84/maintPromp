@@ -1,30 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { deleteProjectById, getProjectById, updateProjectById } from '@/lib/store';
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const project = await prisma.project.findUnique({
-      where: {
-        id: params.id
-      },
-      include: {
-        installations: true,
-        inventory: true,
-        versions: {
-          orderBy: { createdAt: 'desc' },
-          take: 10
-        }
-      }
-    });
+    const project = await getProjectById(params.id);
 
     if (!project) {
       return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
 
-    return NextResponse.json(project);
+    const orderedVersions = [...project.versions]
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      .slice(0, 10);
+
+    return NextResponse.json({
+      ...project,
+      versions: orderedVersions,
+    });
   } catch (error) {
     console.error('Error fetching project:', error);
     return NextResponse.json({ error: 'Error al obtener proyecto' }, { status: 500 });
@@ -37,14 +32,11 @@ export async function PATCH(
 ) {
   try {
     const body = await req.json();
+    const project = await updateProjectById(params.id, body);
 
-    const project = await prisma.project.update({
-      where: {
-        id: params.id
-      },
-      data: body,
-      include: { installations: true }
-    });
+    if (!project) {
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
+    }
 
     return NextResponse.json(project);
   } catch (error) {
@@ -58,11 +50,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.project.delete({
-      where: {
-        id: params.id
-      }
-    });
+    const deleted = await deleteProjectById(params.id);
+
+    if (!deleted) {
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
