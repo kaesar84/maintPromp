@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "start:render": "npm run db:push && npm run start",
+    "postinstall": "prisma generate",
     "lint": "next lint",
     "db:push": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma db push",
     "db:migrate": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma migrate dev",
