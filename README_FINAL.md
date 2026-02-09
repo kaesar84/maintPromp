@@ -162,7 +162,7 @@ npm start
 
 ## ☁️ DESPLIEGUE (RENDER)
 
-Este proyecto ya incluye `render.yaml` para desplegar con SQLite persistente.
+Este proyecto incluye `render.yaml` para desplegar en Render Free y arrancar sin pasos manuales.
 
 ### Pasos
 
@@ -171,10 +171,10 @@ Este proyecto ya incluye `render.yaml` para desplegar con SQLite persistente.
 3. Selecciona tu repositorio.
 4. Render leerá `render.yaml` y creará:
    - Servicio web Node.js
-   - Disco persistente en `/var/data`
-   - `DATABASE_URL=file:/var/data/dev.db`
+   - `DATABASE_URL=file:./dev.db`
 5. Al arrancar, el comando `npm start` ejecuta:
    - `npm run db:push` (sincroniza tablas)
+   - `npm run db:seed` (carga templates y proyecto demo si no existe)
    - `next start`
 
 ### Si lo configuras manualmente (sin Blueprint)
@@ -183,20 +183,13 @@ Usa exactamente:
 
 - Build Command: `npm ci --include=dev && npm run build`
 - Start Command: `npm start`
-- Environment Variable: `DATABASE_URL=file:/var/data/dev.db`
-- Disk: mount path `/var/data` (mínimo 1 GB)
+- Environment Variable: `DATABASE_URL=file:./dev.db`
 
-### Cargar datos demo en producción (opcional)
+### Importante sobre plan Free
 
-Después del primer deploy, abre `Shell` en Render y ejecuta:
-
-```bash
-npm run db:seed
-```
-
-Luego entra en:
-
-`https://tu-app.onrender.com/dashboard`
+- En Free no hay disco persistente: la base de datos SQLite puede reiniciarse.
+- Esta configuración recrea tablas y datos demo automáticamente al arrancar.
+- Si quieres persistencia real de datos, necesitas plan de pago con Disk o migrar a PostgreSQL.
 
 -----
 

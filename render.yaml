@@ -6,13 +6,9 @@ services:
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /dashboard
-    disk:
-      name: data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: DATABASE_URL
-        value: file:/var/data/dev.db
+        value: file:./dev.db
       - key: NEXT_TELEMETRY_DISABLED
         value: "1"
       - key: NODE_VERSION

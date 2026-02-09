@@ -443,82 +443,91 @@ async function main() {
 
   console.log('✅ Templates creados');
 
-  // 2. Crear proyecto de ejemplo
-  console.log('🏗️  Creando proyecto de ejemplo...');
-  
-  const project = await prisma.project.create({
-    data: {
-      name: 'Edificio Industrial - Alcobendas',
-      ccaa: 'Madrid',
-      municipio: 'Alcobendas',
-      usoEdificio: 'Industrial',
-      objetivoPlan: 'plan_estandar_profesional',
-      criticidad: 'alta',
-      notes: 'Nave industrial con oficinas anexas. Actividad: fabricación componentes electrónicos.',
-      installations: {
-        create: [
-          { type: 'PCI', enabled: true },
-          { type: 'BT', enabled: true },
-          { type: 'HVAC', enabled: true },
-          { type: 'LEGIONELLA', enabled: true },
-          { type: 'CAI', enabled: true },
-          { type: 'FV', enabled: true },
-          { type: 'PARARRAYOS', enabled: true }
-        ]
-      },
-      inventory: {
-        create: [
-          // PCI
-          { installationType: 'PCI', fieldKey: 'num_extintores', fieldValue: '45' },
-          { installationType: 'PCI', fieldKey: 'num_bocas_incendio', fieldValue: '8' },
-          { installationType: 'PCI', fieldKey: 'tiene_rociadores', fieldValue: 'Sí' },
-          { installationType: 'PCI', fieldKey: 'tiene_deteccion', fieldValue: 'Sí' },
-          { installationType: 'PCI', fieldKey: 'superficie_m2', fieldValue: '3500' },
-          
-          // BT
-          { installationType: 'BT', fieldKey: 'potencia_contratada_kw', fieldValue: '250' },
-          { installationType: 'BT', fieldKey: 'tension_nominal', fieldValue: '230/400V' },
-          { installationType: 'BT', fieldKey: 'num_cuadros', fieldValue: '12' },
-          { installationType: 'BT', fieldKey: 'tiene_sai', fieldValue: 'Sí' },
-          { installationType: 'BT', fieldKey: 'tierra_ohms', fieldValue: 'Desconocido' },
-          
-          // HVAC
-          { installationType: 'HVAC', fieldKey: 'tipo_sistema', fieldValue: 'VRV/VRF' },
-          { installationType: 'HVAC', fieldKey: 'potencia_frio_kw', fieldValue: '180' },
-          { installationType: 'HVAC', fieldKey: 'potencia_calor_kw', fieldValue: '200' },
-          { installationType: 'HVAC', fieldKey: 'gas_refrigerante', fieldValue: 'R-410A' },
-          { installationType: 'HVAC', fieldKey: 'carga_kg', fieldValue: '85' },
-          
-          // LEGIONELLA
-          { installationType: 'LEGIONELLA', fieldKey: 'tiene_torres_refrigeracion', fieldValue: 'No' },
-          { installationType: 'LEGIONELLA', fieldKey: 'tiene_acs', fieldValue: 'Sí' },
-          { installationType: 'LEGIONELLA', fieldKey: 'volumen_acumulacion_litros', fieldValue: '1500' },
-          { installationType: 'LEGIONELLA', fieldKey: 'tiene_fuentes_ornamentales', fieldValue: 'No' },
-          { installationType: 'LEGIONELLA', fieldKey: 'tiene_jacuzzi_spa', fieldValue: 'No' },
-          
-          // CAI
-          { installationType: 'CAI', fieldKey: 'superficie_m2', fieldValue: '3500' },
-          { installationType: 'CAI', fieldKey: 'ocupacion_personas', fieldValue: '120' },
-          { installationType: 'CAI', fieldKey: 'tipo_ventilacion', fieldValue: 'Mecánica' },
-          { installationType: 'CAI', fieldKey: 'tiene_filtros', fieldValue: 'Sí' },
-          
-          // FV
-          { installationType: 'FV', fieldKey: 'potencia_pico_kwp', fieldValue: '100' },
-          { installationType: 'FV', fieldKey: 'num_paneles', fieldValue: '250' },
-          { installationType: 'FV', fieldKey: 'tipo_instalacion', fieldValue: 'Conectada a red' },
-          { installationType: 'FV', fieldKey: 'marca_inversor', fieldValue: 'Desconocido' },
-          
-          // PARARRAYOS
-          { installationType: 'PARARRAYOS', fieldKey: 'tipo', fieldValue: 'PDC' },
-          { installationType: 'PARARRAYOS', fieldKey: 'nivel_proteccion', fieldValue: 'II' },
-          { installationType: 'PARARRAYOS', fieldKey: 'resistencia_tierra_ohms', fieldValue: 'Desconocido' }
-        ]
-      }
-    }
+  // 2. Crear proyecto de ejemplo (idempotente)
+  console.log('🏗️  Verificando proyecto de ejemplo...');
+  const demoProjectName = 'Edificio Industrial - Alcobendas';
+  const existingProject = await prisma.project.findFirst({
+    where: { name: demoProjectName }
   });
 
-  console.log('✅ Proyecto de ejemplo creado');
-  console.log(`   ID: ${project.id}`);
+  if (!existingProject) {
+    const project = await prisma.project.create({
+      data: {
+        name: demoProjectName,
+        ccaa: 'Madrid',
+        municipio: 'Alcobendas',
+        usoEdificio: 'Industrial',
+        objetivoPlan: 'plan_estandar_profesional',
+        criticidad: 'alta',
+        notes: 'Nave industrial con oficinas anexas. Actividad: fabricación componentes electrónicos.',
+        installations: {
+          create: [
+            { type: 'PCI', enabled: true },
+            { type: 'BT', enabled: true },
+            { type: 'HVAC', enabled: true },
+            { type: 'LEGIONELLA', enabled: true },
+            { type: 'CAI', enabled: true },
+            { type: 'FV', enabled: true },
+            { type: 'PARARRAYOS', enabled: true }
+          ]
+        },
+        inventory: {
+          create: [
+            // PCI
+            { installationType: 'PCI', fieldKey: 'num_extintores', fieldValue: '45' },
+            { installationType: 'PCI', fieldKey: 'num_bocas_incendio', fieldValue: '8' },
+            { installationType: 'PCI', fieldKey: 'tiene_rociadores', fieldValue: 'Sí' },
+            { installationType: 'PCI', fieldKey: 'tiene_deteccion', fieldValue: 'Sí' },
+            { installationType: 'PCI', fieldKey: 'superficie_m2', fieldValue: '3500' },
+            
+            // BT
+            { installationType: 'BT', fieldKey: 'potencia_contratada_kw', fieldValue: '250' },
+            { installationType: 'BT', fieldKey: 'tension_nominal', fieldValue: '230/400V' },
+            { installationType: 'BT', fieldKey: 'num_cuadros', fieldValue: '12' },
+            { installationType: 'BT', fieldKey: 'tiene_sai', fieldValue: 'Sí' },
+            { installationType: 'BT', fieldKey: 'tierra_ohms', fieldValue: 'Desconocido' },
+            
+            // HVAC
+            { installationType: 'HVAC', fieldKey: 'tipo_sistema', fieldValue: 'VRV/VRF' },
+            { installationType: 'HVAC', fieldKey: 'potencia_frio_kw', fieldValue: '180' },
+            { installationType: 'HVAC', fieldKey: 'potencia_calor_kw', fieldValue: '200' },
+            { installationType: 'HVAC', fieldKey: 'gas_refrigerante', fieldValue: 'R-410A' },
+            { installationType: 'HVAC', fieldKey: 'carga_kg', fieldValue: '85' },
+            
+            // LEGIONELLA
+            { installationType: 'LEGIONELLA', fieldKey: 'tiene_torres_refrigeracion', fieldValue: 'No' },
+            { installationType: 'LEGIONELLA', fieldKey: 'tiene_acs', fieldValue: 'Sí' },
+            { installationType: 'LEGIONELLA', fieldKey: 'volumen_acumulacion_litros', fieldValue: '1500' },
+            { installationType: 'LEGIONELLA', fieldKey: 'tiene_fuentes_ornamentales', fieldValue: 'No' },
+            { installationType: 'LEGIONELLA', fieldKey: 'tiene_jacuzzi_spa', fieldValue: 'No' },
+            
+            // CAI
+            { installationType: 'CAI', fieldKey: 'superficie_m2', fieldValue: '3500' },
+            { installationType: 'CAI', fieldKey: 'ocupacion_personas', fieldValue: '120' },
+            { installationType: 'CAI', fieldKey: 'tipo_ventilacion', fieldValue: 'Mecánica' },
+            { installationType: 'CAI', fieldKey: 'tiene_filtros', fieldValue: 'Sí' },
+            
+            // FV
+            { installationType: 'FV', fieldKey: 'potencia_pico_kwp', fieldValue: '100' },
+            { installationType: 'FV', fieldKey: 'num_paneles', fieldValue: '250' },
+            { installationType: 'FV', fieldKey: 'tipo_instalacion', fieldValue: 'Conectada a red' },
+            { installationType: 'FV', fieldKey: 'marca_inversor', fieldValue: 'Desconocido' },
+            
+            // PARARRAYOS
+            { installationType: 'PARARRAYOS', fieldKey: 'tipo', fieldValue: 'PDC' },
+            { installationType: 'PARARRAYOS', fieldKey: 'nivel_proteccion', fieldValue: 'II' },
+            { installationType: 'PARARRAYOS', fieldKey: 'resistencia_tierra_ohms', fieldValue: 'Desconocido' }
+          ]
+        }
+      }
+    });
+
+    console.log('✅ Proyecto de ejemplo creado');
+    console.log(`   ID: ${project.id}`);
+  } else {
+    console.log('ℹ️  Proyecto de ejemplo ya existe, se mantiene sin cambios');
+    console.log(`   ID: ${existingProject.id}`);
+  }
 
   console.log('\n🎉 ¡Seed completado exitosamente!');
   console.log('\n📋 Credenciales de acceso:');
