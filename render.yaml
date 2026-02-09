@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: maintenance-prompt-builder
+    runtime: node
+    plan: starter
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start:render
+    healthCheckPath: /dashboard
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        value: file:/var/data/dev.db
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: NODE_VERSION
+        value: "20.18.0"

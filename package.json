@@ -1,0 +1,52 @@
+{
+  "name": "maintenance-prompt-builder",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "start:render": "npm run db:push && npm run start",
+    "lint": "next lint",
+    "db:push": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma db push",
+    "db:migrate": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma migrate dev",
+    "db:seed": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} node --import tsx prisma/seed.ts",
+    "db:studio": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma studio",
+    "check": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} node check-credentials.js"
+  },
+  "dependencies": {
+    "next": "^14.2.0",
+    "@prisma/client": "^5.18.0",
+    "next-auth": "^4.24.7",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-hook-form": "^7.52.0",
+    "@hookform/resolvers": "^3.9.0",
+    "zod": "^3.23.0",
+    "lucide-react": "^0.400.0",
+    "tailwindcss": "^3.4.0",
+    "@radix-ui/react-select": "^2.1.0",
+    "@radix-ui/react-checkbox": "^1.1.0",
+    "@radix-ui/react-tabs": "^1.1.0",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.4.0",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/bcryptjs": "^2.4.6",
+    "typescript": "^5.5.0",
+    "prisma": "^5.18.0",
+    "tsx": "^4.16.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss-animate": "^1.0.7"
+  }
+}

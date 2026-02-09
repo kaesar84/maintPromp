@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id              String    @id @default(cuid())
+  name            String
+  ccaa            String
+  municipio       String?
+  usoEdificio     String
+  objetivoPlan    String
+  criticidad      String
+  solicitarValoracionTemporal Boolean @default(false)
+  notes           String?
+  archived        Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  installations   Installation[]
+  inventory       InventoryItem[]
+  versions        PromptVersion[]
+}
+
+model Installation {
+  id              String    @id @default(cuid())
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  type            String
+  enabled         Boolean   @default(true)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@unique([projectId, type])
+}
+
+model InventoryItem {
+  id              String    @id @default(cuid())
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  installationType String
+  fieldKey        String
+  fieldValue      String
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@unique([projectId, installationType, fieldKey])
+}
+
+model PromptVersion {
+  id              String    @id @default(cuid())
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  modo            String
+  installationFocus String?
+  tareaEspecifica String?
+  
+  inputSnapshot   String
+  promptGenerated String
+  
+  createdAt       DateTime  @default(now())
+}
+
+model PromptTemplate {
+  id              String    @id @default(cuid())
+  key             String    @unique
+  name            String
+  description     String?
+  content         String
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
